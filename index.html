@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Global AI Policy Lab</title>
+
+<style>
+:root{
+  --vone:#4797cd;
+  --bg:#0b1222;
+  --card:#1a2338;
+  --text:#eef3f8;
+  --muted:#aab4c3;
+  --border:#2b3550;
+  --good:#2ecc71;
+  --warn:#f1c40f;
+}
+
+*{box-sizing:border-box}
+body{
+  margin:0;
+  font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+  background:radial-gradient(900px 500px at 20% 10%, rgba(71,151,205,.25), transparent 60%), var(--bg);
+  color:var(--text);
+  min-height:100vh;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  padding:20px;
+}
+
+.app{
+  width:100%;
+  max-width:1000px;
+  background:rgba(11,18,34,.95);
+  border:1px solid var(--border);
+  border-radius:18px;
+  overflow:hidden;
+}
+
+header{
+  padding:16px 20px;
+  border-bottom:1px solid var(--border);
+}
+header h1{margin:0;font-size:18px}
+header p{margin:4px 0 0;font-size:13px;color:var(--muted)}
+
+main{
+  padding:20px;
+  display:grid;
+  grid-template-columns:1.35fr .65fr;
+  gap:18px;
+}
+@media(max-width:900px){ main{grid-template-columns:1fr} }
+
+.card{
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:16px;
+  padding:16px;
+}
+
+.howto{
+  background:rgba(71,151,205,.12);
+  border:1px solid var(--border);
+  border-radius:14px;
+  padding:12px;
+  margin-bottom:14px;
+}
+.howto h2{margin:0 0 6px;font-size:14px}
+.howto ul{margin:0;padding-left:18px;font-size:13px;color:var(--muted)}
+.howto li{margin:6px 0}
+
+h3{margin:0 0 8px;font-size:16px}
+p{margin:0 0 12px;font-size:14px;line-height:1.45;color:var(--muted)}
+
+.scenario{
+  font-size:15px;
+  color:var(--text);
+  margin-bottom:12px;
+}
+
+.buttons{display:grid;gap:10px}
+button{
+  background:#10172a;
+  border:1px solid var(--border);
+  color:var(--text);
+  padding:12px;
+  border-radius:14px;
+  font-size:14px;
+  cursor:pointer;
+}
+button:hover{border-color:var(--vone)}
+button:disabled{opacity:.6;cursor:not-allowed}
+
+.feedback{
+  display:none;
+  margin-top:12px;
+  padding:12px;
+  border-radius:12px;
+  border:1px solid var(--border);
+  font-size:13px;
+  line-height:1.35;
+  white-space:pre-wrap;
+}
+.feedback.good{background:rgba(46,204,113,.12)}
+.feedback.warn{background:rgba(241,196,15,.12)}
+
+.actions{
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+  margin-top:14px;
+}
+.btn{
+  background:#0f172a;
+  border:1px solid var(--border);
+  color:var(--text);
+  padding:10px 12px;
+  border-radius:14px;
+  cursor:pointer;
+  font-size:13px;
+}
+.btn.primary{
+  background:rgba(71,151,205,.22);
+  border-color:rgba(71,151,205,.55);
+}
+
+.sidebar h4{font-size:13px;margin:0 0 8px}
+.meter{
+  height:10px;
+  background:#0f172a;
+  border:1px solid var(--border);
+  border-radius:999px;
+  overflow:hidden;
+}
+.fill{height:100%;background:var(--vone);width:0%}
+
+.stat{margin-top:14px;font-size:13px}
+.stat strong{display:block;font-size:18px;margin-top:4px}
+
+.codebox{
+  display:none;
+  margin-top:14px;
+  padding:12px;
+  border:1px dashed var(--border);
+  border-radius:12px;
+  background:#0f172a;
+}
+.code{
+  font-family:monospace;
+  font-size:16px;
+  margin-top:6px;
+}
+.small{font-size:12px;color:var(--muted);margin-top:6px}
+</style>
+</head>
+
+<body>
+<div class="app">
+<header>
+  <h1>Global AI Policy Lab — Choose the Right Guardrails</h1>
+  <p>Week 4 · Principles, frameworks, regulations, and risk-based AI governance</p>
+</header>
+
+<main>
+<section class="card">
+  <div class="howto">
+    <h2>How to play</h2>
+    <ul>
+      <li>You are advising an organization deploying AI globally.</li>
+      <li>For each scenario, choose the most appropriate governance approach.</li>
+      <li>Then classify the AI system’s risk level.</li>
+      <li>Your choices affect governance readiness and trust.</li>
+    </ul>
+  </div>
+
+  <h3 id="title"></h3>
+  <p class="scenario" id="scenario"></p>
+
+  <div class="buttons" id="choices"></div>
+  <div class="feedback" id="feedback"></div>
+
+  <div class="actions">
+    <button class="btn primary" id="nextBtn" disabled>Continue</button>
+    <button class="btn" id="restartBtn">Restart</button>
+  </div>
+
+  <div class="codebox" id="codeBox">
+    <strong>Completion Code</strong>
+    <div class="code" id="code"></div>
+    <p class="small" id="scoreMeaning"></p>
+    <div class="actions">
+      <button class="btn primary" onclick="location.reload()">Play Again</button>
+      <a class="btn" href="https://voneacademy.com/courses">Exit</a>
+    </div>
+  </div>
+</section>
+
+<aside class="card sidebar">
+  <h4>Governance Readiness</h4>
+  <div class="meter"><div class="fill" id="govFill"></div></div>
+
+  <div class="stat">
+    Score
+    <strong id="score">0</strong>
+  </div>
+
+  <div class="stat">
+    Status
+    <strong id="status">Advising</strong>
+  </div>
+
+  <p class="small">
+    Governance readiness reflects how well AI risk is matched with the right standards.
+  </p>
+</aside>
+</main>
+</div>
+
+<script>
+const scenarios=[
+{
+ title:"Scenario 1: AI Hiring Tool",
+ text:"A company uses AI to screen job applicants across multiple countries.",
+ correctType:1,
+ correctRisk:2,
+ explain:"High-impact systems affecting employment require strong frameworks and regulatory alignment. Risk-based models like the EU AI Act classify this as high risk."
+},
+{
+ title:"Scenario 2: AI Code Assistant",
+ text:"An AI tool helps developers write code faster but does not make final decisions.",
+ correctType:0,
+ correctRisk:0,
+ explain:"Low-risk assistive tools benefit from guiding principles rather than heavy regulation."
+},
+{
+ title:"Scenario 3: Credit Risk Scoring",
+ text:"An AI system assesses creditworthiness for loan approvals.",
+ correctType:1,
+ correctRisk:2,
+ explain:"Frameworks like NIST AI RMF help manage risk, while regulations may apply due to financial and societal impact."
+},
+{
+ title:"Scenario 4: Internal HR Chatbot",
+ text:"A chatbot answers internal HR questions using company policy documents.",
+ correctType:0,
+ correctRisk:1,
+ explain:"Principles and internal governance are often sufficient for moderate-risk internal systems."
+},
+{
+ title:"Scenario 5: AI-Powered Facial Recognition",
+ text:"An AI system identifies individuals in public spaces.",
+ correctType:2,
+ correctRisk:2,
+ explain:"High-risk use cases often trigger regulatory requirements under laws like the EU AI Act."
+}
+];
+
+let idx=0;
+let score=0;
+let step=0;
+
+const titleEl=document.getElementById("title");
+const scenarioEl=document.getElementById("scenario");
+const choicesEl=document.getElementById("choices");
+const feedbackEl=document.getElementById("feedback");
+const nextBtn=document.getElementById("nextBtn");
+const restartBtn=document.getElementById("restartBtn");
+
+const govFill=document.getElementById("govFill");
+const scoreEl=document.getElementById("score");
+const statusEl=document.getElementById("status");
+
+const codeBox=document.getElementById("codeBox");
+const codeEl=document.getElementById("code");
+const scoreMeaningEl=document.getElementById("scoreMeaning");
+
+function render(){
+ const s=scenarios[idx];
+ titleEl.textContent=s.title;
+ scenarioEl.textContent=s.text;
+ feedbackEl.style.display="none";
+ nextBtn.disabled=true;
+ choicesEl.innerHTML="";
+
+ const opts = step===0
+  ? ["Principles (OECD-style)", "Framework (NIST / ISO)", "Regulation (EU AI Act)"]
+  : ["Low Risk", "Medium Risk", "High Risk"];
+
+ opts.forEach((o,i)=>{
+  const b=document.createElement("button");
+  b.textContent=o;
+  b.onclick=()=>select(i);
+  choicesEl.appendChild(b);
+ });
+}
+
+function select(i){
+ const s=scenarios[idx];
+ let correct=false;
+
+ if(step===0){
+  correct = i===s.correctType;
+ }else{
+  correct = i===s.correctRisk;
+ }
+
+ score += correct ? 10 : 4;
+ score = Math.min(score,100);
+ govFill.style.width = score+"%";
+ scoreEl.textContent = score;
+ statusEl.textContent = score>=80 ? "Governance Ready" : "Learning Governance";
+
+ feedbackEl.className = "feedback " + (correct ? "good" : "warn");
+ feedbackEl.textContent =
+  (correct?"✅ Appropriate choice.\n\n":"⚠️ Risky choice.\n\n") +
+  s.explain;
+
+ feedbackEl.style.display="block";
+ [...choicesEl.children].forEach(b=>b.disabled=true);
+ nextBtn.disabled=false;
+}
+
+nextBtn.onclick=()=>{
+ if(step===0){
+  step=1;
+  render();
+ }else{
+  step=0;
+  idx++;
+  if(idx<scenarios.length){
+    render();
+  }else{
+    finish();
+  }
+ }
+};
+
+function finish(){
+ titleEl.textContent="Policy Review Complete";
+ scenarioEl.textContent="You matched AI use cases with the right governance tools and risk levels.";
+ choicesEl.innerHTML="";
+ feedbackEl.style.display="none";
+ nextBtn.style.display="none";
+ restartBtn.style.display="none";
+
+ const code="VONE-AI-W4-"+score+"-"+Math.floor(100+Math.random()*900);
+ codeEl.textContent=code;
+
+ scoreMeaningEl.textContent =
+  score>=80
+   ?"Strong result: You understand how global standards guide responsible AI use."
+   :score>=60
+    ?"Good foundation: Review differences between principles, frameworks, and regulations."
+    :"Starter level: Replay and focus on risk classification logic.";
+
+ codeBox.style.display="block";
+ statusEl.textContent="Completed";
+}
+
+restartBtn.onclick=()=>location.reload();
+render();
+</script>
+</body>
+</html>
